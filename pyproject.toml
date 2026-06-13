@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "confgate"
+name = "topo-confgate"
 version = "0.1.0"
 description = "Free confidence gate for LLM correctness: logistic regression on (generation length, mean logprob), with cascade routing and split-conformal certificates. Ships the pinned SPEC-v6 result of the topo-confidence project."
 readme = "README.md"

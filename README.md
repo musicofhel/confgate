@@ -23,10 +23,13 @@ OLMo-2 length-led), so both are always pinned, with per-family weights.
 ## Install
 
 ```bash
-pip install -e .          # from this directory
+pip install topo-confgate     # distribution name on PyPI
+# or, from a clone:
+pip install -e .
 ```
 
-Python >= 3.10; deps: numpy, scikit-learn.
+The import name is `confgate` (`import confgate`) regardless of how it was
+installed. Python >= 3.10; deps: numpy, scikit-learn.
 
 ## Use
 
