@@ -23,7 +23,10 @@ services:
       - confgate_graph_data:/data
       - confgate_graph_logs:/logs
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u $${NEO4J_USER:-neo4j} -p $${NEO4J_PASSWORD:-confgate_graph_dev} 'RETURN 1' || exit 1"]
+      # Host-side ${...} interpolation (NOT $$): compose bakes the real password
+      # from --env-file .env at up-time, so the check matches NEO4J_AUTH. The
+      # committed file shows only the ${NEO4J_PASSWORD} placeholder — no secret.
+      test: ["CMD-SHELL", "cypher-shell -u ${NEO4J_USER:-neo4j} -p ${NEO4J_PASSWORD:-confgate_graph_dev} 'RETURN 1' || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 12
