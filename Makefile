@@ -26,7 +26,7 @@ test-int-ci:
 
 # --- Zero-network end-to-end smoke (wired in Phase 4). ---
 e2e-dry:
-	pytest -m "e2e_dry" tests/research_graph/ || echo "e2e-dry target lands in Phase 4"
+	PYTEST_MARKER=e2e_dry bash research-graph/scripts/spin-test-graph.sh
 
 # --- Graph lifecycle helpers ---
 up:
@@ -39,6 +39,10 @@ schema:
 	@set -a && . research-graph/.env && set +a && \
 	  docker exec -i confgate-research-graph cypher-shell -u "$$NEO4J_USER" -p "$$NEO4J_PASSWORD" \
 	    < research-graph/schema.cypher
+
+# Seed CF-1…CF-8 :Finding nodes so the grouping experiment-side lights up.
+seed:
+	cd research-graph && python seed_findings.py
 
 lint:
 	ruff check confgate research-graph

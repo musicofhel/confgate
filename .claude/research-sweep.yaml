@@ -1,0 +1,82 @@
+project: confgate
+
+# link-forge's research-sweep.ts fans these queries across the public APIs,
+# dedupes, and writes ~/link-forge/data/research-sweep-confgate-<date>.json.
+# admit.py (--from-sweep confgate) then reads the newest such file.
+apis:
+  - arxiv
+  - semantic-scholar
+  - openalex
+  - huggingface
+
+per_query_limit: 10
+
+# Keyword groups are keyed to confgate's open levers (CH-1…CH-6). A paper that
+# could BEAT the free length+logprob gate or sharpen a certificate is what we
+# want to surface; the admit relevance gate leans inclusive on top of this.
+keyword_groups:
+  # CH-1 — a zero/low-cost readout beats free length+logprob on held-out families
+  llm_calibration_free:
+    - free confidence estimation large language model
+    - length normalized confidence LLM
+    - logprob calibration language model correctness
+    - zero cost uncertainty estimate generation
+    - self-consistency confidence reasoning
+    - token entropy correctness prediction
+    - black-box LLM confidence calibration
+    - answer length reasoning correctness signal
+
+  # CH-1 / selective answering — abstention & risk-coverage
+  selective_prediction:
+    - selective prediction language model abstention
+    - risk coverage curve LLM
+    - know when to abstain large language model
+    - confidence threshold answer rejection LLM
+    - selective classification deep learning
+    - hallucination detection abstention reasoning
+
+  # CH-2 — a cheap pre-generation signal beats prompt-length 0.71
+  preflight_uncertainty:
+    - pre-generation difficulty prediction prompt
+    - prompt-only correctness prediction language model
+    - question difficulty estimation before answering
+    - input uncertainty prediction transformer
+    - prompt embedding hardness reasoning
+    - predicting LLM accuracy from the prompt
+
+  # CH-3 — a routing/cascade policy beats the gate-ordered cascade at matched cost
+  cascade_routing:
+    - LLM cascade cost quality routing
+    - learned router language models preference
+    - model routing matched cost accuracy
+    - adaptive inference cascade early exit LLM
+    - mixture of models routing efficiency
+    - FrugalGPT cascade language model
+    - confidence-gated model escalation
+
+  # CH-4 / CH-6 — conformal & group-conditional certificates
+  conformal_cross_domain:
+    - conformal prediction language model
+    - cross-domain conformal coverage shift
+    - distribution-free uncertainty quantification LLM
+    - Mondrian conformal group conditional
+    - adaptive conformal inference online
+    - weighted conformal covariate shift
+    - split conformal calibration coverage guarantee
+
+  # CH-5 — a better escalation target / base-swap raises the matched-cost ceiling
+  domain_specialized_small_models:
+    - math specialized small language model
+    - domain adapted 1.5B reasoning model
+    - knowledge distillation reasoning small model
+    - instruction tuned math LLM benchmark
+    - strong small model MATH GSM8K
+    - base model swap reasoning accuracy
+
+  # cross-cutting — calibration / small-model interpretability breadth
+  cross_cutting:
+    - calibration transformer reasoning
+    - small language model correctness prediction
+    - linear probe correctness prediction transformer
+    - uncertainty quantification chain of thought
+    - test-time compute confidence allocation
