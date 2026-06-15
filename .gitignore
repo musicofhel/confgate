@@ -10,3 +10,10 @@ dist/
 venv/
 *.npz
 .DS_Store
+
+# Secrets — research-graph tooling (Phase 0, v1.2 Gap 2). Never commit live creds.
+.env
+research-graph/.env
+
+# research-graph briefs are generated triage output, not source
+research-graph/briefs/
