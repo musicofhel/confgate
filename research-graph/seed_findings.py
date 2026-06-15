@@ -16,16 +16,12 @@ import os
 import re
 from pathlib import Path
 
-from dotenv import load_dotenv
-from neo4j import GraphDatabase
+# dotenv + neo4j are imported LAZILY in main() so the pure parser
+# (parse_findings) stays importable in the Docker-free unit tier, which installs
+# neither — same discipline as admit.py.
 
 ROOT = Path(__file__).resolve().parent
-load_dotenv(ROOT / ".env")
-
 FINDINGS = ROOT.parent / "FINDINGS.md"
-BOLT = os.environ.get("NEO4J_BOLT_URL", "bolt://localhost:7689")
-USER = os.environ.get("NEO4J_USER", "neo4j")
-PASSWORD = os.environ.get("NEO4J_PASSWORD", "confgate_graph_dev")
 
 CF_HEADER = re.compile(r"^### (CF-\d+): (.+)$", re.MULTILINE)
 
@@ -40,10 +36,18 @@ def parse_findings(path: Path = FINDINGS) -> list[tuple[str, str]]:
 
 
 def main() -> None:
+    from dotenv import load_dotenv
+    from neo4j import GraphDatabase
+
+    load_dotenv(ROOT / ".env")
+    bolt = os.environ.get("NEO4J_BOLT_URL", "bolt://localhost:7689")
+    user = os.environ.get("NEO4J_USER", "neo4j")
+    password = os.environ.get("NEO4J_PASSWORD", "confgate_graph_dev")
+
     findings = parse_findings()
     if not findings:
         raise SystemExit(f"No '### CF-N:' headers found in {FINDINGS}.")
-    drv = GraphDatabase.driver(BOLT, auth=(USER, PASSWORD))
+    drv = GraphDatabase.driver(bolt, auth=(user, password))
     with drv.session() as s:
         for fid, claim in findings:
             s.run(MERGE_FINDING, id=fid, claim=claim)
