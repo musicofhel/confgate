@@ -1,0 +1,131 @@
+You are doing one-paper deep triage for the `~/confgate` research program — the free length+logprob confidence gate. Your job is to produce a markdown brief at `~/confgate/research-graph/briefs/triage-__TODAY__-__ARXIV_ID__.md` that a human or agent can review and feed to `promote_brief.py`. The triage goal: propose `:FutureExperiment` levers that could **beat the free gate** (raise its OOF AUROC, beat the gate-ordered cascade at matched cost, crack the cross-domain certificate wall, or find a better small-model base-swap).
+
+**The paper to triage**: arxiv id `__ARXIV_ID__`. Fetch via `mcp__paper-search__read_arxiv_paper` or `mcp__arxiv__read_paper`. If those fail, fall back to `WebFetch` of `https://arxiv.org/abs/__ARXIV_ID__`.
+
+You are running inside a fresh `claude -p` invocation that is itself the per-paper-isolated deep-pass subagent. **Do the work yourself; do not spawn further Agent subagents.** Per-paper isolation is already guaranteed by the parent shell loop spawning a separate `claude` process per paper.
+
+**Default context — load these first, in this order. Do not load anything else until after the Refutations section is written** (a confirmation-bias defense per Ríos-García `2604.18805`, documented at 68% in agent traces; loading full bodies makes the model fit the paper into existing frames instead of finding refutations).
+
+1. CF-N + CH-N one-liners. Run via Bash:
+   `grep -E "^### (CF|CH)-[0-9]+:" ~/confgate/FINDINGS.md ~/confgate/HYPOTHESES.md`
+2. The pinned headline anchors (the ONLY numbers you may cite — they come verbatim from the shipped package):
+   `python3 -c "import json;d=json.load(open('$HOME/confgate/confgate/data/pinned_meta.json'));print(json.dumps(d['anchors'],indent=2))"`
+3. Existing PAPER_INDEX status flags. Run:
+   `grep -E "^## [0-9]|^\*\*Status:\*\*" ~/confgate/PAPER_INDEX.md`
+
+Do **not** load the full `FINDINGS.md`, `HYPOTHESES.md`, or `NEXT_EXPERIMENTS.md` by default. On-demand `Read` of a specific `### CF-N:` body is allowed once past Refutations — log every such read in "Sources consulted".
+
+**Brief structure (deterministic, in this exact order — the headings are parsed byte-for-byte; do not rename or reorder; empty sections write `none`):**
+
+```markdown
+# Triage brief — __ARXIV_ID__ — <paper title>
+
+Source: https://arxiv.org/abs/__ARXIV_ID__
+Triaged: __TODAY__
+
+## Refutations
+
+List **≥3** distinct ways this paper would *refute* a current CF-N finding or CH-N lever. Each must cite a specific CF-N/CH-N, name a mechanism by which the refutation would fire, and be falsifiable by a concrete experiment. If you genuinely cannot find ≥3 after a careful read, write "No genuine refutations identified after [N] minutes — paper is likely off-topic or purely confirming. Recommend rejection or weak CITED ONLY status." Do not invent thin refutations.
+
+## Direct connections to CF-N / CH-N
+
+Each connection cites a specific CF-N/CH-N and the relevant pinned anchor (free-gate OOF AUROC SmolLM2 0.810 / Gemma 0.844 / OLMo-2 0.838; cascade +3.38pp; cross-scale cert validity 1.0 @ 0.60 cov; Qwen2.5-Math base-swap +9.2pp). On-demand `Read` of FINDINGS.md is allowed — log it in "Sources consulted".
+
+## Methodologies extracted
+
+Every technique/probe/metric/loss/training trick the paper uses that could touch a confidence readout, a routing/cascade policy, a calibration or conformal procedure, or a small-model base-swap. For each:
+
+- **<method name>** — one-line description.
+  *Replication cost*: e.g. "20min CPU", "H100 day", "needs new dataset".
+  *We'd plausibly run this*: yes | no — one phrase why.
+
+Write "none extracted" only if pure theory with no borrowable method.
+
+## Approaches & framings
+
+Theoretical lens shifts / reformulations / conceptual moves. One sentence each; how each intersects our CF-N/CH-N framings. Write "none extracted" if only narrow incremental claims.
+
+## Datasets & benchmarks
+
+Datasets/benchmarks used or introduced, with applicability to the MATH-500 / BBH / small-model regime. For each:
+
+- **<name>** — size, license, accessibility (HF | gated | proprietary | not released). Applicable? yes | no — one phrase.
+
+Write "none" if purely theoretical or trivial synthetic data.
+
+## Implementation details worth capturing
+
+Architectures, hyperparameters, schedules, gotchas, code links. Bullet list. Write "none" if no concrete guidance.
+
+## Replicable intermediates
+
+The smallest cross-check we could run *right now* against the paper's headline claim with confgate's shipped artifacts (pinned_meta.json anchors, the gate/cascade/certify code). Bullet list naming the artifact/function. Write "none — paper claims need fresh data we don't have" if impossible.
+
+## Cross-paper signals
+
+Papers this paper cites that are (or should be) in our graph. Format:
+- <arxiv-id> — already in graph (status: graphed | pending_triage). Connection.
+- <arxiv-id> — NOT in graph; recommend admission. Connection.
+Write "none worth flagging" otherwise.
+
+## Proposed FutureExperiments
+
+Propose experiments that could beat the free gate. AT LEAST one if at all possible. One or more YAML blocks with EXACTLY these fields (every field required; parser validates roi ∈ [1,10], status, priority, and that depends-on/would-update are real CF-N):
+
+    ```yaml
+    - id: CG-FE<next>
+      pathway: CG
+      description: "..."
+      rationale: "..."
+      trigger: "..."
+      status: READY
+      priority: HIGH
+      roi: 8
+      cost: "20min CPU"
+      depends-on: [CF-1, CF-3]
+      would-update: [CF-3]
+      triggered-by: ["__ARXIV_ID__"]
+      relies-on: []
+    ```
+
+Pick CG-FE numbers well above any currently-graphed id (add 50+). Flag GPU-only experiments with `cost: "H100 ..."` at `roi ≥ 7` only.
+
+## Proposed HYPOTHESES.md additions
+
+CH-N blocks, numbers well above the current Next ID:
+
+    ### CH-<next>: <one-line lever>
+    **Priority:** HIGH | MEDIUM | LOW | PARKED
+    **Motivated by:** __ARXIV_ID__ + <relevant CF-N>
+    **Test:** <what you'd run, what data, est time>
+    **Requires:** <CPU/GPU, model, cached or new data>
+    **Would change:** <what shifts on confirm vs reject>
+    **Blocks:** <CH-N or "nothing">
+
+Write "none" if the paper motivates only methodology FEs.
+
+## Proposed PAPER_INDEX.md classification
+
+    ## __ARXIV_ID__ — <paper title> (<authors>, <year>)
+
+    **Relevance:** <one paragraph — which CF-N/CH-N it touches>
+
+    **Key claim we tested:** <their claim, in our terms>
+
+    **Our result:** **<STATUS>** <one paragraph>
+
+    **Related experiments:** <CG-FE-N, CH-N>
+
+    **Status:** REPLICATED | CONTRADICTED | PARTIALLY CONFIRMED | CITED ONLY | TO TEST
+
+## New claims
+
+Quantitative claims this brief introduces that need a `validate_claims.py` (`cg-*`) entry. Empty if the brief only quotes pinned numbers.
+
+## Sources consulted
+
+Every file read on-demand beyond default context. Format:
+    - <path> — <reason>
+```
+
+**Hard rules:** Refutations first (before any CF-N body Read). Use only CF-1…CF-8 / CH-1…CH-6 that exist. Numbers come ONLY from pinned_meta.json anchors. High CG-FE/CH-N numbering. Filename exactly `briefs/triage-__TODAY__-__ARXIV_ID__.md`. Leave sections empty with `none` rather than filler. **Do NOT auto-promote** — just write the brief; print its absolute path on completion.
