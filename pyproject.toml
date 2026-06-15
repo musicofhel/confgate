@@ -46,3 +46,7 @@ line-length = 99
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "integration: needs a live Neo4j (research-graph tooling tier)",
+    "e2e_dry: zero-network end-to-end smoke (Phase 4)",
+]

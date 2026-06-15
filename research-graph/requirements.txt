@@ -1,0 +1,11 @@
+# confgate research-graph tooling (local/CPU only — no GPU, no torch).
+neo4j>=5.20
+python-dotenv>=1.0
+pyyaml>=6.0
+
+# sentence-transformers is OPTIONAL: Papers reuse link-forge's copied embeddings,
+# so we only need it IF we later embed CF :Finding nodes for vector search.
+# NOTE: link-forge embeds with ONNX Xenova/all-MiniLM-L6-v2; the PyTorch
+# sentence-transformers variant is near-identical (cosine ~0.999) but NOT
+# bit-identical. MVP grouping is tag-based, so this is unused for now.
+# sentence-transformers>=2.7
