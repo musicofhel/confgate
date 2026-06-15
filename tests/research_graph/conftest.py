@@ -53,6 +53,49 @@ def neo4j_driver():
     driver.close()
 
 
+def _lf_conn():
+    """Resolve the link-forge stand-in (uri, user, password), or None."""
+    uri = _env("LINK_FORGE_TEST_BOLT_URL")
+    user = _env("LINK_FORGE_TEST_USER") or "neo4j"
+    pwd = _env("LINK_FORGE_TEST_PASSWORD")
+    if not uri or not pwd:
+        return None
+    return uri, user, pwd
+
+
+@pytest.fixture(scope="session")
+def linkforge_driver():
+    """A SECOND Neo4j standing in for link-forge (Gap 4). Skips if unconfigured.
+
+    Phase 1 admit.py reads link-forge READ-ONLY to copy embeddings; the test
+    seeds a link-forge-shaped :Link here. Locally `make test-int` spins this on
+    :7691; CI points it at the `neo4j-linkforge` service container (:7688).
+    """
+    conn = _lf_conn()
+    if conn is None:
+        pytest.skip(
+            "No link-forge test Neo4j configured — set LINK_FORGE_TEST_BOLT_URL / "
+            "LINK_FORGE_TEST_PASSWORD (see `make test-int`)."
+        )
+    from neo4j import GraphDatabase
+
+    uri, user, pwd = conn
+    driver = GraphDatabase.driver(uri, auth=(user, pwd))
+    driver.verify_connectivity()
+    yield driver
+    driver.close()
+
+
+@pytest.fixture
+def clean_linkforge(linkforge_driver):
+    """Wipe the link-forge stand-in before and after each test."""
+    with linkforge_driver.session() as s:
+        s.run("MATCH (n) DETACH DELETE n")
+    yield linkforge_driver
+    with linkforge_driver.session() as s:
+        s.run("MATCH (n) DETACH DELETE n")
+
+
 @pytest.fixture
 def clean_graph(neo4j_driver):
     """Wipe nodes AND drop every constraint/index so schema-from-scratch is honest."""
