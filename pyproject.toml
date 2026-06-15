@@ -27,7 +27,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff"]
+# pyyaml: brief_parser.py (research-graph tooling) parses CG-FE YAML blocks; the
+# unit tier installs only [dev], so the Phase-2 parser test needs it here.
+dev = ["pytest", "ruff", "pyyaml"]
 
 [project.scripts]
 confgate = "confgate.cli:main"
