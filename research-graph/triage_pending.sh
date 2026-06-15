@@ -11,10 +11,8 @@
 # MVP DIVERGENCE FROM TOPO: workers WRITE BRIEFS ONLY — no inline auto-promote.
 # Promotion is a separate explicit step (`promote_brief.py`, Phase 3).
 #
-# Pending-id source: until Phase 3 ships `query.py pending --ids-only`, this
-# dispatcher fetches the list directly from the graph with a small inline Python
-# (driver from research-graph/requirements.txt, creds from .env). When query.py
-# lands, swap the `list_pending` body for `python query.py pending --ids-only`.
+# Pending-id source: `query.py pending --ids-only` (Phase 3) emits the arxiv IDs
+# of every :Paper{status:'pending_triage'} in forge-score order, one per line.
 #
 # Usage:
 #   bash triage_pending.sh                 # 3 workers, all pending
@@ -44,32 +42,7 @@ else
 fi
 
 list_pending() {
-  "$PYTHON" - <<'PY'
-import os
-from pathlib import Path
-
-try:
-    from dotenv import load_dotenv
-    load_dotenv(Path(__file__).resolve().parent / ".env")
-except Exception:
-    pass
-
-from neo4j import GraphDatabase
-
-uri = os.environ.get("NEO4J_BOLT_URL", "bolt://localhost:7689")
-user = os.environ.get("NEO4J_USER", "neo4j")
-pwd = os.environ.get("NEO4J_PASSWORD", "confgate_graph_dev")
-drv = GraphDatabase.driver(uri, auth=(user, pwd))
-with drv.session(default_access_mode="READ") as s:
-    rows = s.run(
-        "MATCH (p:Paper {status:'pending_triage'}) "
-        "RETURN p.arxiv_id AS id ORDER BY coalesce(p.forge_score,0) DESC, p.arxiv_id"
-    )
-    for r in rows:
-        if r["id"]:
-            print(r["id"])
-drv.close()
-PY
+  "$PYTHON" query.py pending --ids-only
 }
 
 ids="$(list_pending)"

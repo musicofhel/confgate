@@ -115,3 +115,14 @@ prealgebra baselines.
 **Would change:** CF-6 if it raises coverage materially at held validity.
 
 **Blocks:** nothing.
+
+---
+
+## Historical / abandoned
+
+_New CH-N blocks promoted from triage briefs are inserted directly above this
+heading by `research-graph/promote_brief.py` (it is the load-bearing insertion
+anchor). Hypotheses that have been refuted, mooted, or superseded are moved down
+here with a one-line disposition so the live queue above stays current._
+
+_(none yet)_
