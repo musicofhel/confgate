@@ -60,4 +60,6 @@ export LINK_FORGE_TEST_BOLT_URL="bolt://localhost:${LF_BOLT}"
 export LINK_FORGE_TEST_USER="neo4j"
 export LINK_FORGE_TEST_PASSWORD="$PW"
 
-pytest -m integration tests/research_graph/ "$@"
+# PYTEST_MARKER lets `make e2e-dry` reuse this spinner to run just the
+# zero-network e2e tracer (`-m e2e_dry`); defaults to the full integration tier.
+pytest -m "${PYTEST_MARKER:-integration}" tests/research_graph/ "$@"
