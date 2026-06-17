@@ -90,6 +90,15 @@ Propose experiments that could beat the free gate. AT LEAST one if at all possib
 
 Pick CG-FE numbers well above any currently-graphed id (add 50+). Flag GPU-only experiments with `cost: "H100 ..."` at `roi ≥ 7` only.
 
+**Feasibility grounding — a fresh-eyes pass on every FE before you finalize it.** Re-read each FE you just wrote as a skeptic who assumes *nothing already exists*. Do not trust the framing you wrote a moment ago; verify it. The `cost:` field is a claim about data that must be *earned, not assumed* — most mispriced FEs die here:
+
+- If your `cost`/`rationale`/`description` says "cached", "re-score", "existing", "already generated", or "reuse" — name the **exact artifact**: a `pinned_meta.json` anchor key, or a shipped `confgate/` function. "Cached" is legal **only** for data reachable from the shipped package. Raw per-item arrays, per-token logs, prompt strings, and any *second* model's or *second* checkpoint's outputs are **NOT** in the shipped package — never assume they exist.
+- If the experiment needs data **outside** confgate's shipped artifacts (a different model checkpoint, a base-vs-instruct pair, a cross-model comparison, fresh prompts), it requires **fresh generation**: price `cost` accordingly (CPU-hours, or `"H100 …"` if a >1B model must generate) — not `"30min CPU"`.
+- The classic trap: a paper compares model A vs B (or base vs instruct), so you propose "re-score A and B from cache." But confgate only ever generated **one** checkpoint per family. **Any two-checkpoint / base-vs-instruct / cross-model FE almost certainly needs fresh generation — verify the second artifact exists before pricing it cheap.**
+- When you cannot confirm an artifact is reachable, do not silently assume it: write `data UNVERIFIED — assumes <X>` in the `rationale` and price `cost` as if fresh. An honestly-expensive FE is useful; a cheap-looking FE built on a phantom cache wastes a run.
+
+This pass mirrors the Refutations-first discipline: assume the cheap path is wrong until an artifact proves it.
+
 ## Proposed HYPOTHESES.md additions
 
 CH-N blocks, numbers well above the current Next ID:

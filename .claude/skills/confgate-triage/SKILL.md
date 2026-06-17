@@ -171,6 +171,23 @@ collisions with concurrent briefs — `promote_brief.py` renumbers to contiguous
 ids at promote time. Flag GPU-only experiments with `cost: "H100 ..."` and only
 propose them at `roi ≥ 7` (experiment *execution* is out of MVP scope).
 
+**Feasibility grounding — a fresh-eyes pass on every FE.** Re-read each FE as a
+skeptic who assumes *nothing already exists*; do not trust the framing you just
+wrote. The `cost` field is a claim about data that must be **earned, not assumed**:
+
+- "cached" / "re-score" / "existing" is legal **only** for data reachable from the
+  shipped package — name the exact `pinned_meta.json` anchor key or `confgate/`
+  function. Raw per-item arrays, per-token logs, prompt strings, and any *second*
+  checkpoint's or *second* model's outputs are **not** shipped; never assume they exist.
+- The classic trap: a paper compares A vs B (or base vs instruct), so you write
+  "re-score A and B from cache" — but confgate only ever generated **one** checkpoint
+  per family. **Any two-checkpoint / base-vs-instruct / cross-model FE almost certainly
+  needs fresh generation** — verify the second artifact before pricing it cheap.
+- Data outside the shipped artifacts ⇒ price `cost` as fresh generation (CPU-hours, or
+  `"H100 …"` for a >1B model), and if you cannot confirm reachability write
+  `data UNVERIFIED — assumes <X>` in the `rationale`. An honestly-expensive FE is
+  useful; a cheap-looking FE on a phantom cache wastes a run.
+
 ## Proposed HYPOTHESES.md additions
 
 CH-N blocks. Pick numbers well above the current Next ID to avoid collisions.

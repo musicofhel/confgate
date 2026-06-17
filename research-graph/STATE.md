@@ -56,16 +56,39 @@ Papers admitted to the dev graph (`:7689`):
 
 ## Next session — where to go
 
-The grouping MVP is done. The natural next steps, **all a separate v2 spec**
-(do NOT start without one):
+**Update 2026-06-16 (promotion DONE):** all 4 deep-triaged briefs are now PROMOTED.
+The CG-FE queue is live — `python query.py future CG` shows **24 experiments**, CH
+ledger advanced to `Next ID: CH-14`, pending-triage drained to **0**. Promotion
+notes: the SmolLM2 + refusal briefs each had one curation-flavoured FE (CG-FE13,
+CG-FE24) **born MOOTED** against the refuted `curation-helps-distillation` premise
+(working as intended); the 2306.03423 external `cg-reuter-prompt-refusal-acc` claim
+was **dropped** at promote (refusal-task number, not a confgate measurement) so the
+claims-gate passed. One promote (2601.00138) hit a non-fatal link-forge
+AuthenticationRateLimit in `bridge.py` step 6 (stale `LINK_FORGE_PASSWORD`) — graph
+writes still completed. See [`HANDOFF_2026-06-16.md`](HANDOFF_2026-06-16.md) for the
+triage timings and the experiment rationale.
 
-1. **Drain the backlog**: 5 papers admitted but only 1 triaged — `bash triage_pending.sh`
-   to brief the rest, then `promote_brief.py` each. (Or admit a bigger slice of the
-   857-record sweep first.)
-2. **v2 pipeline**: script generation → execution → 3-phase autopilot daemon →
-   semantic mooting (`moot_sweep.py`). Mirror topo's autopilot, scoped to local CPU.
-3. **Act on the queue**: once CG-FEs accumulate, the highest-ROI ones are the
-   candidate experiments to actually run against the free gate (confgate v0.2).
+1. **Run a cheap CF-1-threatening test.** Top READY candidates from the live queue
+   (all re-score *cached* generations, ~20–30 min CPU, not mooted, not closure):
+   - **CG-FE11** [ROI 8] — base vs Instruct SmolLM2-1.7B length-only AUROC vs pinned
+     0.781. Tests whether "length carries the gate" is a post-training artifact. **The
+     cleanest cheap CF-1 stressor — start here.**
+   - **CG-FE22** [ROI 8] — TF-IDF (1–3 gram) lexical preflight readout vs the 0.7056
+     prompt-length ceiling (CF-7 never tested lexical content). Snag: needs raw prompt
+     strings recovered from the gate cache.
+   - **CG-FE4 / CG-FE9** [ROI 6] — LAC softmax-margin answer-token readout vs the free
+     baseline on SmolLM2/Gemma/OLMo-2.
+   Lower value: CG-FE18 (information-removal, ROI 9 but 1–2 days, fresh generations);
+   CG-FE19 (observability-conditioned conformal — rhymes with the proven cross-domain
+   wall, run only to close the proxy angle).
+2. **v2 pipeline** (separate spec, do NOT start without one): script generation →
+   execution → 3-phase autopilot daemon → semantic mooting (`moot_sweep.py`). Mirror
+   topo's autopilot, scoped to local CPU.
+
+Caveat from project memory: several queue items rhyme with lines already run+refuted in
+topo v6–v8 (esp. the conformal cross-domain wall and the already-REFUTED
+`curation-helps-distillation` premise — which auto-mooted CG-FE13/CG-FE24). CG-FE11 is
+the strongest genuinely-novel cheap probe.
 
 ## Constraints (unchanged, always in force)
 
