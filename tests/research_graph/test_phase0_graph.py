@@ -56,12 +56,32 @@ def test_findings_full_field_set():
             assert field in block, f"CF-{i} missing {field}"
 
 
-def test_hypotheses_bootstrap_ch1_through_ch6():
+def test_hypotheses_seed_levers_and_monotonic_next_id():
+    """HYPOTHESES.md is a *living* file — promote_brief.py appends CH-N blocks from
+    triage briefs and advances the Next-ID. So assert durable invariants rather
+    than a frozen bootstrap: the six seed levers survive, the insertion anchor
+    promote depends on is present, and the Next-ID is well-formed (a free slot
+    strictly ahead of every existing block, so the renumberer never collides)."""
     text = HYPOTHESES.read_text()
+
+    # The original CH-1..6 levers are permanent seeds, never removed.
     for n in range(1, 7):
-        assert re.search(rf"^### CH-{n}:", text, re.MULTILINE), f"CH-{n} missing"
-    assert "Next ID: CH-7" in text, "HYPOTHESES.md must carry the 'Next ID: CH-7' marker"
-    assert "### CH-7:" not in text
+        assert re.search(rf"^### CH-{n}:", text, re.MULTILINE), f"seed lever CH-{n} missing"
+
+    # promote_brief.py inserts new blocks immediately above this anchor.
+    assert "## Historical / abandoned" in text, "promote insertion anchor missing"
+
+    # Monotonic Next-ID: present, and strictly greater than every CH block so the
+    # next promoted hypothesis lands in a free, non-colliding slot.
+    m = re.search(r"Next ID: CH-(\d+)", text)
+    assert m, "HYPOTHESES.md must carry a 'Next ID: CH-N' marker"
+    next_id = int(m.group(1))
+    existing = [int(x) for x in re.findall(r"^### CH-(\d+):", text, re.MULTILINE)]
+    assert existing, "no CH blocks found"
+    assert next_id > max(existing), (
+        f"Next ID CH-{next_id} must be ahead of the highest block CH-{max(existing)}"
+    )
+    assert f"### CH-{next_id}:" not in text, f"Next-ID slot CH-{next_id} must be free"
 
 
 def test_schema_file_parses_into_statements():

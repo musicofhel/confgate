@@ -13,6 +13,7 @@ Two tiers:
 from __future__ import annotations
 
 import json
+import re
 import sys
 
 import pytest
@@ -99,8 +100,14 @@ def test_rubric_prompt_includes_context_and_paper():
 
 def test_known_tag_ids_namespace():
     ids = admit.known_tag_ids()
+    # The seed levers/findings are always present.
     assert {"CF-1", "CF-8", "CH-1", "CH-6"} <= ids
-    assert "CF-9" not in ids and "CH-7" not in ids
+    # Every id is in the confgate CF-/CH- namespace — an unported clone reading a
+    # topo-style F-/H-/P11-FE file would leak foreign ids here. (HYPOTHESES is a
+    # living file; CH-7+ legitimately appear once briefs are promoted, so we
+    # assert the namespace shape, not a frozen id set.)
+    assert ids, "known_tag_ids must not be empty"
+    assert all(re.fullmatch(r"C[FH]-\d+", i) for i in ids), sorted(ids)
 
 
 # --------------------------- integration tier --------------------------------
