@@ -28,6 +28,7 @@ import pytest
 from tests.research_graph.graphutil import (
     REPO_ROOT,
     SCHEMA_CYPHER,
+    bootstrap_repo,
     split_cypher_statements,
 )
 
@@ -117,10 +118,11 @@ def _seed_findings(driver):
 
 
 def _repo_copy(tmp_path: Path) -> Path:
-    """A throwaway repo root with copies of the markdown files promote mutates."""
-    for name in ("HYPOTHESES.md", "PAPER_INDEX.md"):
-        (tmp_path / name).write_text((REPO_ROOT / name).read_text())
-    return tmp_path
+    """A throwaway repo root seeded with the frozen Phase-0 bootstrap of the
+    markdown files promote mutates. Hermetic by design — see graphutil.bootstrap_repo
+    (copying the live canonical files would break the renumber assertions every
+    time the pipeline promotes a real brief)."""
+    return bootstrap_repo(tmp_path)
 
 
 def _brief_copy(tmp_path: Path) -> Path:

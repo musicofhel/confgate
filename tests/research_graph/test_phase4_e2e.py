@@ -29,6 +29,7 @@ import pytest
 from tests.research_graph.graphutil import (
     REPO_ROOT,
     SCHEMA_CYPHER,
+    bootstrap_repo,
     split_cypher_statements,
 )
 
@@ -81,9 +82,9 @@ def _write_sweep_fixture(tmp_path: Path) -> Path:
 
 
 def _repo_copy(tmp_path: Path) -> Path:
-    for name in ("HYPOTHESES.md", "PAPER_INDEX.md"):
-        (tmp_path / name).write_text((REPO_ROOT / name).read_text())
-    return tmp_path
+    # Frozen Phase-0 bootstrap, not the live canonical files — keeps the e2e
+    # promote hermetic across real pipeline promotes (see graphutil.bootstrap_repo).
+    return bootstrap_repo(tmp_path)
 
 
 # --------------------------------------------------------------------------- #
